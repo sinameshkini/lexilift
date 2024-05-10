@@ -66,3 +66,15 @@ make build
 # method 2: run directly
 make run
 ```
+
+## TODO
+- [ ] complete docs
+- [ ] test and finalize audio
+- [ ] build with tags
+- [ ] build for all golang supported platforms
+- [ ] unit test
+- [ ] integration test
+- [ ] multi language
+- [ ] custom configuration (default lang, word view, etc)
+- [ ] word tags
+- [ ] my words management
