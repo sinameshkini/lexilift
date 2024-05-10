@@ -40,8 +40,12 @@ func Run(debug bool) error {
 		return err
 	}
 
+	if err = c.Menu(); err != nil {
+		return err
+	}
+
 	for {
-		if err = c.Menu(); err != nil {
+		if err = c.Handler(); err != nil {
 			slog.Error(err.Error())
 		}
 	}

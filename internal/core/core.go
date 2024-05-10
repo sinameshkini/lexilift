@@ -10,6 +10,8 @@ import (
 	"lexilift/pkg/dictionary"
 	"log/slog"
 	"os"
+	"os/exec"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -31,6 +33,62 @@ func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 		//ply:   ply,
 		debug: debug,
 	}
+}
+
+func (c *Core) Handler() (err error) {
+	var (
+		input rune
+	)
+
+	fmt.Print(":::> ")
+
+	input, err = inputChar()
+	if err != nil {
+		return err
+	}
+
+	if c.debug {
+		fmt.Printf("Input: %c\n", input)
+	}
+
+	switch input {
+	case '0':
+		return c.Dashboard()
+	case '1':
+		return c.Review()
+	case '2':
+		return c.AddNewWord()
+	case '3':
+		return c.AddWordsList()
+	case '4':
+		return c.ReviewHistory()
+	case 'm':
+		return c.Menu()
+	case 'c':
+		return clearConsole()
+	case 'q':
+		fmt.Println("See you soon, goodbye :)")
+		os.Exit(0)
+	default:
+		return
+	}
+
+	return
+}
+
+func (c *Core) Menu() (err error) {
+	fmt.Println(strings.Repeat(">", 32), "LexiLift", strings.Repeat("<", 32))
+	fmt.Println("Menu:")
+	fmt.Println("\t0- Dashboard")
+	fmt.Println("\t1- Review my words")
+	fmt.Println("\t2- Add a new word to my words")
+	fmt.Println("\t3- Add words list to my words")
+	fmt.Println("\t4- Review history")
+	fmt.Println("\tm- Menu")
+	fmt.Println("\tc- Clear")
+	fmt.Println("\tq- close the app")
+	fmt.Println("Press the character corresponding to the action you want to perform")
+	return
 }
 
 func (c *Core) Dashboard() (err error) {
@@ -92,74 +150,6 @@ func (c *Core) Dashboard() (err error) {
 	fmt.Println("")
 
 	return nil
-}
-
-func (c *Core) ReviewHistory() (err error) {
-	var (
-		allReviews    []*models.Review
-		totalDuration time.Duration
-	)
-
-	if allReviews, err = c.repo.GetAllReviews(); err != nil {
-		return err
-	}
-
-	fmt.Println("\nMy Reviews:")
-	for idx, r := range allReviews {
-		totalDuration += r.Duration
-		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
-			slog.Error(err.Error())
-			continue
-		}
-	}
-	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
-
-	fmt.Println("")
-
-	return nil
-}
-
-func (c *Core) Menu() (err error) {
-	var (
-		input rune
-	)
-	fmt.Println(strings.Repeat(">", 32), "LexiLift", strings.Repeat("<", 32))
-	fmt.Println("Menu:")
-	fmt.Println("\t0- Dashboard")
-	fmt.Println("\t1- Review my words")
-	fmt.Println("\t2- Add a new word to my words")
-	fmt.Println("\t3- Add words list to my words")
-	fmt.Println("\t4- Review history")
-	fmt.Println("\tq- close the app")
-	fmt.Printf("Press the number corresponding to the action you want to perform: ")
-	input, err = inputChar()
-	if err != nil {
-		return err
-	}
-
-	if c.debug {
-		fmt.Printf("Input: %c\n", input)
-	}
-
-	switch input {
-	case '0':
-		return c.Dashboard()
-	case '1':
-		return c.Review()
-	case '2':
-		return c.AddNewWord()
-	case '3':
-		return c.AddWordsList()
-	case '4':
-		return c.ReviewHistory()
-	case 'q':
-		fmt.Println("See you soon, goodbye :)")
-		os.Exit(0)
-	default:
-		return c.Menu()
-	}
-
-	return
 }
 
 func (c *Core) Save(word string) (w *models.Word, err error) {
@@ -382,6 +372,31 @@ func (c *Core) AddWordsList() (err error) {
 	return nil
 }
 
+func (c *Core) ReviewHistory() (err error) {
+	var (
+		allReviews    []*models.Review
+		totalDuration time.Duration
+	)
+
+	if allReviews, err = c.repo.GetAllReviews(); err != nil {
+		return err
+	}
+
+	fmt.Println("\nMy Reviews:")
+	for idx, r := range allReviews {
+		totalDuration += r.Duration
+		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+	}
+	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
+
+	fmt.Println("")
+
+	return nil
+}
+
 func printDiv() {
 	fmt.Println(strings.Repeat("*", 64))
 }
@@ -429,6 +444,22 @@ func inputStrings() (input []string, err error) {
 
 	if err = scanner.Err(); err != nil {
 		return
+	}
+
+	return
+}
+
+func clearConsole() (err error) {
+	// Clearing console based on the operating system
+	switch _os := runtime.GOOS; _os {
+	case "linux", "darwin":
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		return cmd.Run()
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		return cmd.Run()
 	}
 
 	return

@@ -36,8 +36,11 @@ Menu:
 	2- Add a new word to my words
 	3- Add words list to my words
 	4- Review history
+	m- Menu
+	c- Clear
 	q- close the app
-Press the number corresponding to the action you want to perform: 
+Press the character corresponding to the action you want to perform
+:::> 
 ```
 
 ## Installation
