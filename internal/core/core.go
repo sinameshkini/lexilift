@@ -131,14 +131,14 @@ func (c *Core) Menu() (err error) {
 	fmt.Println("\t3- Add words list to my words")
 	fmt.Println("\t4- Review history")
 	fmt.Println("\tq- close the app")
-	fmt.Printf("press number of action you want do:")
+	fmt.Printf("Press the number corresponding to the action you want to perform: ")
 	input, err = inputChar()
 	if err != nil {
 		return err
 	}
 
 	if c.debug {
-		fmt.Printf("input: %c\n", input)
+		fmt.Printf("Input: %c\n", input)
 	}
 
 	switch input {
@@ -153,7 +153,7 @@ func (c *Core) Menu() (err error) {
 	case '4':
 		return c.ReviewHistory()
 	case 'q':
-		fmt.Println("See you soon, bye :)")
+		fmt.Println("See you soon, goodbye :)")
 		os.Exit(0)
 	default:
 		return c.Menu()
@@ -169,12 +169,12 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 		sound string
 	)
 
-	fmt.Println("getting persian translate from google translate API ...")
+	fmt.Println("Getting Persian translation from the Google Translate API...")
 	if mean, err = gt.Translate(word, "en", "fa"); err != nil {
 		return
 	}
 
-	fmt.Println("getting translate from dictionary API ...")
+	fmt.Println("Getting translation from the dictionary API...")
 	if dict, sound, err = c.dict.Find(word); err != nil {
 		return
 	}
@@ -187,7 +187,7 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 	}
 
 	if err = c.repo.Create(*w); err != nil {
-		slog.Error("can not save to DB:", err.Error())
+		slog.Error("cannot save to DB:", err.Error())
 	}
 
 	return
@@ -204,12 +204,12 @@ func (c *Core) Review() (err error) {
 
 	// TODO review history
 
-	fmt.Print("from know count: ")
+	fmt.Print("From proficiency count: ")
 	if fromKnw, err = inputInt(); err != nil {
 		return err
 	}
 
-	fmt.Print("to know count: ")
+	fmt.Print("To proficiency count: ")
 	if toKnw, err = inputInt(); err != nil {
 		return err
 	}
@@ -220,10 +220,10 @@ func (c *Core) Review() (err error) {
 
 	printDiv()
 
-	fmt.Printf("%d words founded\n", len(words))
+	fmt.Printf("%d words found\n", len(words))
 	if len(words) != 0 {
 		fmt.Println("Starting ...")
-		fmt.Println("press Enter to view word meaning")
+		fmt.Println("Press Enter to view word meaning")
 
 		for idx, word := range words {
 			word.ReviewCount += 1
@@ -297,7 +297,7 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 
 func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	printDiv()
-	fmt.Printf("\t%d- %s\ncreated at: %s, reviewd: %d, proficiency: %d)\n",
+	fmt.Printf("\t%d- %s\nCreated at: %s, Reviewed: %d, Proficiency: %d)\n",
 		idx+1, word.Word, word.CreatedAt.Format("2006-01-02 15:04"), word.ReviewCount, word.Proficiency)
 
 	//if word.SoundFile != "" {
@@ -310,16 +310,16 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 		return err
 	}
 
-	fmt.Println("\tmeanings:")
+	fmt.Println("\tMeanings:")
 	if word.Dict != nil && len(word.Dict.Meanings) != 0 {
 		for _, m := range word.Dict.Meanings[0].Definitions {
 			fmt.Printf("\t- %s\n", m.Definition)
 			if m.Example != "" {
-				fmt.Printf("\texample: %s\n", m.Example)
+				fmt.Printf("\tExample: %s\n", m.Example)
 			}
 		}
 	}
-	fmt.Printf("\tpersian: %s\n", word.Mean)
+	fmt.Printf("\tPersian: %s\n", word.Mean)
 
 	return nil
 }
@@ -331,7 +331,7 @@ func (c *Core) AddNewWord() (err error) {
 	)
 
 	printDiv()
-	fmt.Print("type the word: ")
+	fmt.Print("Type the word: ")
 	if input, err = inputString(); err != nil {
 		return err
 	}
@@ -360,7 +360,7 @@ func (c *Core) AddWordsList() (err error) {
 	)
 
 	printDiv()
-	fmt.Print("type each word in new line, submit empty line to finish: \n")
+	fmt.Print("type each word on a new line, submit empty line to finish: \n")
 	if input, err = inputStrings(); err != nil {
 		return err
 	}
@@ -372,11 +372,11 @@ func (c *Core) AddWordsList() (err error) {
 		}
 
 		if word, err = c.Save(w); err != nil {
-			slog.Error(fmt.Sprintf("can not save %s, error:", w), err.Error())
+			slog.Error(fmt.Sprintf("cannot save %s, error:", w), err.Error())
 			continue
 		}
 
-		fmt.Printf("*** %s added successfuly!\n", strings.ToUpper(word.Word))
+		fmt.Printf("*** %s added successfully!\n", strings.ToUpper(word.Word))
 	}
 
 	return nil

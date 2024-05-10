@@ -1,5 +1,6 @@
 # LexiLift
-Is a free and open source CLI app for learning any English word you want!
+
+LexiLift is a free and open-source CLI app designed to help you learn any English word you want!
 
 ```text
 $ ./lexilift                                                                                                      
@@ -11,18 +12,22 @@ $ ./lexilift
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Dashboard <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 My Words:
-Proficiency: -1	 Count: 22
-Proficiency: 1	 Count: 23
-Proficiency: -4	 Count: 1
-Proficiency: 0	 Count: 2
-Proficiency: -2	 Count: 13
-Total: 61
+Proficiency: -6	 Count: 5
+Proficiency: -5	 Count: 1
+Proficiency: -4	 Count: 8
+Proficiency: -2	 Count: 7
+Proficiency: -1	 Count: 40
+Proficiency: 0	 Count: 1
+Proficiency: 1	 Count: 15
+Proficiency: 2	 Count: 2
+Proficiency: 3	 Count: 19
+Total: 98
 
 My Reviews:
-Total: 3
-3- 2024-05-10 11:09  5m21s	FP:-3	TP:-1	CNT:36	KNW:8	NK:14
-2- 2024-05-10 03:27  23s	FP:-2	TP:-2	CNT:3	KNW:1	NK:1
-1- 2024-05-10 03:20  23s	FP:-1	TP:-1	CNT:34	KNW:2	NK:1
+Total: 12, Duration: 1h20m10s
+12- 2024-05-10 20:23  9m17s	FP:0	TP:3	CNT:61	KNW:33	NK:25
+11- 2024-05-10 20:15  8m28s	FP:-5	TP:-1	CNT:37	KNW:21	NK:16
+10- 2024-05-10 15:27  5m21s	FP:-6	TP:-2	CNT:30	KNW:14	NK:16
 
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LexiLift <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Menu:
@@ -32,25 +37,24 @@ Menu:
 	3- Add words list to my words
 	4- Review history
 	q- close the app
-press number of action you want do:
-
+Press the number corresponding to the action you want to perform: 
 ```
 
-## Install
-visit release page: https://github.com/sinameshkini/lexilift/releases
-download executable binary file and run it in your terminal.
+## Installation
 
-## Install for Developers
+To install LexiLift, visit the release page: [LexiLift Releases](https://github.com/sinameshkini/lexilift/releases), download the executable binary file, and run it in your terminal.
 
-### Install dependency
+## Installation for Developers
+
+### Install Dependencies
 ```shell
 sudo apt install git make libasound2-dev
 ```
 
-### Install Golang (go1.22.0 or higher)
-install golang on your workstation with: https://go.dev/dl/
+### Install Golang (version 1.22.0 or higher)
+Install Golang on your workstation from [the official website](https://go.dev/dl/).
 
-### Clone repository
+### Clone Repository
 ```shell
 git clone https://github.com/sinameshkini/lexilift
 ```
@@ -59,32 +63,33 @@ git clone https://github.com/sinameshkini/lexilift
 ```shell
 cd lexilift
 
-# method 1: build and run
+# Method 1: Build and run
 make build
 ./lexilift
 
-# method 2: run directly
+# Method 2: Run directly
 make run
 ```
 
-## TODO
-- [ ] complete docs
-- [ ] test and finalize audio
-- [ ] build with tags
-- [ ] build for all golang supported platforms
-- [ ] unit test
-- [ ] integration test
-- [ ] multi language
-- [ ] custom configuration (default lang, word view, etc)
-- [ ] word tags
-- [ ] my words management
-- [ ] review by tags
-- [ ] show more info like crated at, pronunciation, synonyms and antonym of word in review (existed in db)
-- [ ] impl Data completion words operation
-- [ ] import/export words
-- [ ] calculate points in review (0 to 100)
-- [ ] count review each word
-- [x] add new word option in review running
-- [x] show my words sorted by proficiency
-- [x] show total review duration in dashboard
+## To-Do List
+- [ ] Complete documentation
+- [ ] Test and finalize audio functionality
+- [ ] Build with tags
+- [ ] Build for all Golang-supported platforms
+- [ ] Implement unit tests
+- [ ] Implement integration tests
+- [ ] Add multi-language support
+- [ ] Implement custom configuration (default language, word view, etc.)
+- [ ] Add word tags functionality
+- [ ] Implement management for user's words
+- [ ] Allow reviewing words by tags
+- [ ] Display additional information such as creation date, pronunciation, synonyms, and antonyms of words in reviews (if available in the database)
+- [ ] Implement data completion for words operation
+- [ ] Add import/export functionality for words
+- [ ] Calculate points in reviews (0 to 100 scale)
+- [ ] Track review count for each word
+- [x] Add option to add a new word during review
+- [x] Show user's words sorted by proficiency
+- [x] Display total review duration in the dashboard
 
+---
