@@ -96,7 +96,8 @@ func (c *Core) Dashboard() (err error) {
 
 func (c *Core) ReviewHistory() (err error) {
 	var (
-		allReviews []*models.Review
+		allReviews    []*models.Review
+		totalDuration time.Duration
 	)
 
 	if allReviews, err = c.repo.GetAllReviews(); err != nil {
@@ -104,13 +105,14 @@ func (c *Core) ReviewHistory() (err error) {
 	}
 
 	fmt.Println("\nMy Reviews:")
-	fmt.Printf("Total: %d\n", len(allReviews))
 	for idx, r := range allReviews {
+		totalDuration += r.Duration
 		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
 			slog.Error(err.Error())
 			continue
 		}
 	}
+	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
 
 	fmt.Println("")
 
@@ -224,6 +226,7 @@ func (c *Core) Review() (err error) {
 		fmt.Println("press Enter to view word meaning")
 
 		for idx, word := range words {
+			word.ReviewCount += 1
 		review:
 			if err = c.ShowWord(idx, word); err != nil {
 				slog.Error(err.Error())
@@ -294,7 +297,8 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 
 func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	printDiv()
-	fmt.Printf("\t%d- %s (proficiency: %d)\n", idx+1, word.Word, word.Proficiency)
+	fmt.Printf("\t%d- %s\ncreated at: %s, reviewd: %d, proficiency: %d)\n",
+		idx+1, word.Word, word.CreatedAt.Format("2006-01-02 15:04"), word.ReviewCount, word.Proficiency)
 
 	//if word.SoundFile != "" {
 	//	if err = c.ply.Play(word.SoundFile); err != nil {

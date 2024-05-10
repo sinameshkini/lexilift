@@ -26,6 +26,7 @@ type Word struct {
 	SoundFile   string
 	Dict        *Dictionary
 	Proficiency int
+	ReviewCount int `gorm:"default=0"`
 }
 
 type Dictionary struct {

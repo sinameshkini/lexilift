@@ -1,7 +1,7 @@
 # LexiLift
 Is a free and open source CLI app for learning any English word you want!
 
-```shell
+```text
 $ ./lexilift                                                                                                      
   _                     _   _       _    __   _
  | |       ___  __  __ (_) | |     (_)  / _| | |_
@@ -44,7 +44,7 @@ download executable binary file and run it in your terminal.
 
 ### Install dependency
 ```shell
-sudo apt install git make
+sudo apt install git make libasound2-dev
 ```
 
 ### Install Golang (go1.22.0 or higher)
@@ -87,4 +87,4 @@ make run
 - [x] add new word option in review running
 - [x] show my words sorted by proficiency
 - [x] show total review duration in dashboard
-- 
+
