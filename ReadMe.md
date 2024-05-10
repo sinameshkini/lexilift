@@ -78,3 +78,9 @@ make run
 - [ ] custom configuration (default lang, word view, etc)
 - [ ] word tags
 - [ ] my words management
+- [ ] review by tags
+- [ ] show more info like crated at, pronunciation, synonyms and antonym of word in review (existed in db)
+- [ ] impl Data completion words operation
+- [ ] import/export words
+- [ ] calculate points in review (0 to 100)
+- [ ] count review each word

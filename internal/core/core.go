@@ -270,7 +270,7 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 
 func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	printDiv()
-	fmt.Printf("\t%d- %s\n", idx+1, word.Word)
+	fmt.Printf("\t%d- %s (proficiency: %d)\n", idx+1, word.Word, word.Proficiency)
 
 	//if word.SoundFile != "" {
 	//	if err = c.ply.Play(word.SoundFile); err != nil {
