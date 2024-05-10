@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-	"github.com/common-nighthawk/go-figure"
 	"lexilift/internal/core"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
@@ -33,10 +31,7 @@ func Run(debug bool) error {
 	//c = core.New(repo, dict, ply, debug)
 	c = core.New(repo, dict, debug)
 
-	banner := figure.NewFigure("LexiLift", "", true).String()
-	fmt.Println(banner)
-
-	if err = c.Dashboard(); err != nil {
+	if err = c.About(); err != nil {
 		return err
 	}
 

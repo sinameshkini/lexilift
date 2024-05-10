@@ -86,11 +86,11 @@ make run
 - [ ] Add word tags functionality
 - [ ] Implement management for user's words
 - [ ] Allow reviewing words by tags
-- [ ] Display additional information such as creation date, pronunciation, synonyms, and antonyms of words in reviews (if available in the database)
+- [x] Display additional information such as creation date, pronunciation, synonyms, and antonyms of words in reviews
 - [ ] Implement data completion for words operation
 - [ ] Add import/export functionality for words
 - [ ] Calculate points in reviews (0 to 100 scale)
-- [ ] Track review count for each word
+- [x] Track review count for each word
 - [x] Add option to add a new word during review
 - [x] Show user's words sorted by proficiency
 - [x] Display total review duration in the dashboard

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	gt "github.com/bas24/googletranslatefree"
+	"github.com/common-nighthawk/go-figure"
 	"lexilift/internal/models"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
@@ -52,8 +53,6 @@ func (c *Core) Handler() (err error) {
 	}
 
 	switch input {
-	case '0':
-		return c.Dashboard()
 	case '1':
 		return c.Review()
 	case '2':
@@ -64,8 +63,12 @@ func (c *Core) Handler() (err error) {
 		return c.ReviewHistory()
 	case 'm':
 		return c.Menu()
+	case 'd':
+		return c.Dashboard()
 	case 'c':
 		return clearConsole()
+	case 'a':
+		return c.About()
 	case 'q':
 		fmt.Println("See you soon, goodbye :)")
 		os.Exit(0)
@@ -76,15 +79,23 @@ func (c *Core) Handler() (err error) {
 	return
 }
 
+func (c *Core) About() (err error) {
+	banner := figure.NewFigure("LexiLift", "", true).String()
+	fmt.Println(banner)
+	fmt.Println("LexiLift is a free and open-source CLI app designed to help you learn any English word you want!")
+
+	return nil
+}
+
 func (c *Core) Menu() (err error) {
 	fmt.Println(strings.Repeat(">", 32), "LexiLift", strings.Repeat("<", 32))
 	fmt.Println("Menu:")
-	fmt.Println("\t0- Dashboard")
 	fmt.Println("\t1- Review my words")
 	fmt.Println("\t2- Add a new word to my words")
 	fmt.Println("\t3- Add words list to my words")
 	fmt.Println("\t4- Review history")
 	fmt.Println("\tm- Menu")
+	fmt.Println("\td- Dashboard")
 	fmt.Println("\tc- Clear")
 	fmt.Println("\tq- close the app")
 	fmt.Println("Press the character corresponding to the action you want to perform")
@@ -110,7 +121,7 @@ func (c *Core) Dashboard() (err error) {
 		knowMap[w.Proficiency] += 1
 	}
 
-	for k, _ := range knowMap {
+	for k := range knowMap {
 		sorted = append(sorted, k)
 	}
 
@@ -216,7 +227,6 @@ func (c *Core) Review() (err error) {
 		fmt.Println("Press Enter to view word meaning")
 
 		for idx, word := range words {
-			word.ReviewCount += 1
 		review:
 			if err = c.ShowWord(idx, word); err != nil {
 				slog.Error(err.Error())
@@ -234,9 +244,11 @@ func (c *Core) Review() (err error) {
 			switch input {
 			case '1':
 				word.Proficiency += 1
+				word.ReviewCount += 1
 				know += 1
 			case '2':
 				word.Proficiency -= 1
+				word.ReviewCount += 1
 				notKnow += 1
 			case 'a':
 				if err = c.AddNewWord(); err != nil {
@@ -287,9 +299,15 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 
 func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	printDiv()
-	fmt.Printf("\t%d- %s\nCreated at: %s, Reviewed: %d, Proficiency: %d)\n",
-		idx+1, word.Word, word.CreatedAt.Format("2006-01-02 15:04"), word.ReviewCount, word.Proficiency)
+	fmt.Printf("\t%d- %s\n",
+		idx+1, word.Word)
 
+	if word.Dict != nil && len(word.Dict.Phonetics) != 0 {
+		fmt.Printf("Phonetic: %s, ", word.Dict.Phonetics[0].Text)
+	}
+
+	fmt.Printf("Created at: %s, Reviewed: %d, Proficiency: %d)\n",
+		word.CreatedAt.Format("2006-01-02 15:04"), word.ReviewCount, word.Proficiency)
 	//if word.SoundFile != "" {
 	//	if err = c.ply.Play(word.SoundFile); err != nil {
 	//		slog.Error(err.Error())
@@ -302,10 +320,27 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 
 	fmt.Println("\tMeanings:")
 	if word.Dict != nil && len(word.Dict.Meanings) != 0 {
-		for _, m := range word.Dict.Meanings[0].Definitions {
-			fmt.Printf("\t- %s\n", m.Definition)
-			if m.Example != "" {
-				fmt.Printf("\tExample: %s\n", m.Example)
+		for _, meaning := range word.Dict.Meanings {
+			fmt.Printf("\t(%s)\n", meaning.PartOfSpeech)
+			for _, m := range meaning.Definitions {
+				fmt.Printf("\t- %s\n", m.Definition)
+				if m.Example != "" {
+					fmt.Printf("\tExample: %s\n", m.Example)
+				}
+			}
+			if len(meaning.Synonyms) != 0 {
+				fmt.Println("\tSynonyms:")
+				for _, s := range meaning.Synonyms {
+					fmt.Printf("\t\t- %s\n", s)
+				}
+				fmt.Println("")
+			}
+			if len(meaning.Antonyms) != 0 {
+				fmt.Println("Antonyms:")
+				for _, s := range meaning.Antonyms {
+					fmt.Printf("- %s", s)
+				}
+				fmt.Println("")
 			}
 		}
 	}
