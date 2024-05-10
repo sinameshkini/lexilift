@@ -10,6 +10,7 @@ import (
 	"lexilift/pkg/dictionary"
 	"log/slog"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -37,6 +38,7 @@ func (c *Core) Dashboard() (err error) {
 		allWords   []*models.Word
 		allReviews []*models.Review
 		knowMap    = make(map[int]int)
+		sorted     []int
 	)
 
 	fmt.Println(strings.Repeat(">", 32), "Dashboard", strings.Repeat("<", 32))
@@ -49,10 +51,20 @@ func (c *Core) Dashboard() (err error) {
 		knowMap[w.Proficiency] += 1
 	}
 
-	fmt.Println("My Words:")
-	for knwCnt, cnt := range knowMap {
-		fmt.Printf("Proficiency: %d\t Count: %d\n", knwCnt, cnt)
+	for k, _ := range knowMap {
+		sorted = append(sorted, k)
 	}
+
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i] < sorted[j]
+	})
+
+	fmt.Println("My Words:")
+	for _, i := range sorted {
+		kn := knowMap[i]
+		fmt.Printf("Proficiency: %d\t Count: %d\n", i, kn)
+	}
+
 	fmt.Printf("Total: %d\n", len(allWords))
 
 	if allReviews, err = c.repo.GetAllReviews(); err != nil {
@@ -290,7 +302,7 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	}
 
 	fmt.Println("\tmeanings:")
-	if len(word.Dict.Meanings) != 0 {
+	if word.Dict != nil && len(word.Dict.Meanings) != 0 {
 		for _, m := range word.Dict.Meanings[0].Definitions {
 			fmt.Printf("\t- %s\n", m.Definition)
 			if m.Example != "" {
