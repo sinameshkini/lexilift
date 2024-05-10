@@ -35,10 +35,11 @@ func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 
 func (c *Core) Dashboard() (err error) {
 	var (
-		allWords   []*models.Word
-		allReviews []*models.Review
-		knowMap    = make(map[int]int)
-		sorted     []int
+		allWords      []*models.Word
+		allReviews    []*models.Review
+		knowMap       = make(map[int]int)
+		sorted        []int
+		totalDuration time.Duration
 	)
 
 	fmt.Println(strings.Repeat(">", 32), "Dashboard", strings.Repeat("<", 32))
@@ -71,8 +72,12 @@ func (c *Core) Dashboard() (err error) {
 		return err
 	}
 
+	for _, r := range allReviews {
+		totalDuration += r.Duration
+	}
+
 	fmt.Println("\nMy Reviews:")
-	fmt.Printf("Total: %d\n", len(allReviews))
+	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
 	for idx, r := range allReviews {
 		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
 			slog.Error(err.Error())

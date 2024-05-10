@@ -86,5 +86,5 @@ make run
 - [ ] count review each word
 - [x] add new word option in review running
 - [x] show my words sorted by proficiency
-- [ ] show total review duration in dashboard
+- [x] show total review duration in dashboard
 - 
