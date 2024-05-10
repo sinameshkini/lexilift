@@ -84,3 +84,4 @@ make run
 - [ ] import/export words
 - [ ] calculate points in review (0 to 100)
 - [ ] count review each word
+- [x] add new word option in review running

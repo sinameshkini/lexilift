@@ -207,11 +207,12 @@ func (c *Core) Review() (err error) {
 		fmt.Println("press Enter to view word meaning")
 
 		for idx, word := range words {
+		review:
 			if err = c.ShowWord(idx, word); err != nil {
 				slog.Error(err.Error())
 			}
 
-			fmt.Println("(1) I know, (2) I don't know, (0) nothing, (q) stop")
+			fmt.Println("(1) I know, (2) I don't know, (0) nothing, (a) add a new word, (q) stop")
 			if input, err = inputChar(); err != nil {
 				return err
 			}
@@ -227,6 +228,12 @@ func (c *Core) Review() (err error) {
 			case '2':
 				word.Proficiency -= 1
 				notKnow += 1
+			case 'a':
+				if err = c.AddNewWord(); err != nil {
+					slog.Error(err.Error())
+				}
+
+				goto review
 			default:
 				continue
 			}
