@@ -1,5 +1,5 @@
 # LexiLift
-Is an free and open source CLI app for learning any English word you want!
+Is a free and open source CLI app for learning any English word you want!
 
 ```shell
 $ ./lexilift                                                                                                      
@@ -35,6 +35,10 @@ Menu:
 press number of action you want do:
 
 ```
+
+## Install
+visit release page: https://github.com/sinameshkini/lexilift/releases
+download executable binary file and run it in your terminal.
 
 ## Install for Developers
 
