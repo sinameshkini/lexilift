@@ -61,18 +61,36 @@ func (c *Core) Dashboard() (err error) {
 	fmt.Println("\nMy Reviews:")
 	fmt.Printf("Total: %d\n", len(allReviews))
 	for idx, r := range allReviews {
-		fmt.Printf("%s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\n",
-			r.StartedAt.Format("2006-01-02 15:04"),
-			r.Duration.Round(time.Millisecond).String(),
-			r.FromProficiency,
-			r.ToProficiency,
-			r.Total,
-			r.Know,
-			r.NotKnow,
-		)
+		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
+			slog.Error(err.Error())
+			continue
+		}
 
 		if idx == 2 {
 			break
+		}
+	}
+
+	fmt.Println("")
+
+	return nil
+}
+
+func (c *Core) ReviewHistory() (err error) {
+	var (
+		allReviews []*models.Review
+	)
+
+	if allReviews, err = c.repo.GetAllReviews(); err != nil {
+		return err
+	}
+
+	fmt.Println("\nMy Reviews:")
+	fmt.Printf("Total: %d\n", len(allReviews))
+	for idx, r := range allReviews {
+		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
+			slog.Error(err.Error())
+			continue
 		}
 	}
 
@@ -91,6 +109,7 @@ func (c *Core) Menu() (err error) {
 	fmt.Println("\t1- Review my words")
 	fmt.Println("\t2- Add a new word to my words")
 	fmt.Println("\t3- Add words list to my words")
+	fmt.Println("\t4- Review history")
 	fmt.Println("\tq- close the app")
 	fmt.Printf("press number of action you want do:")
 	input, err = inputChar()
@@ -111,6 +130,8 @@ func (c *Core) Menu() (err error) {
 		return c.AddNewWord()
 	case '3':
 		return c.AddWordsList()
+	case '4':
+		return c.ReviewHistory()
 	case 'q':
 		fmt.Println("See you soon, bye :)")
 		os.Exit(0)
@@ -230,6 +251,20 @@ func (c *Core) Review() (err error) {
 	}
 
 	return
+}
+
+func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
+	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\n",
+		idx,
+		review.StartedAt.Format("2006-01-02 15:04"),
+		review.Duration.Round(time.Second).String(),
+		review.FromProficiency,
+		review.ToProficiency,
+		review.Total,
+		review.Know,
+		review.NotKnow,
+	)
+	return nil
 }
 
 func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
