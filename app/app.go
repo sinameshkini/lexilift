@@ -6,7 +6,6 @@ import (
 	"lexilift/internal/core"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
-	"lexilift/pkg/player"
 	"log/slog"
 )
 
@@ -15,8 +14,8 @@ func Run(debug bool) error {
 		err  error
 		repo *repository.Repo
 		dict *dictionary.API
-		ply  *player.Player
-		c    *core.Core
+		//ply  *player.Player
+		c *core.Core
 		//word  *models.Word
 		//repo  *repository.Repo
 	)
@@ -26,12 +25,13 @@ func Run(debug bool) error {
 	}
 
 	dict = dictionary.New(debug)
+	//
+	//if ply, err = player.New(); err != nil {
+	//	return err
+	//}
 
-	if ply, err = player.New(); err != nil {
-		return err
-	}
-
-	c = core.New(repo, dict, ply, debug)
+	//c = core.New(repo, dict, ply, debug)
+	c = core.New(repo, dict, debug)
 
 	banner := figure.NewFigure("LexiLift", "", true).String()
 	fmt.Println(banner)

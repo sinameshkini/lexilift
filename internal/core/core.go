@@ -8,7 +8,6 @@ import (
 	"lexilift/internal/models"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
-	"lexilift/pkg/player"
 	"log/slog"
 	"os"
 	"strings"
@@ -16,17 +15,19 @@ import (
 )
 
 type Core struct {
-	repo  *repository.Repo
-	dict  *dictionary.API
-	ply   *player.Player
+	repo *repository.Repo
+	dict *dictionary.API
+	//ply   *player.Player
 	debug bool
 }
 
-func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
+// func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
+
+func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 	return &Core{
-		repo:  repo,
-		dict:  dict,
-		ply:   ply,
+		repo: repo,
+		dict: dict,
+		//ply:   ply,
 		debug: debug,
 	}
 }
@@ -271,11 +272,11 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 	printDiv()
 	fmt.Printf("\t%d- %s\n", idx+1, word.Word)
 
-	if word.SoundFile != "" {
-		if err = c.ply.Play(word.SoundFile); err != nil {
-			slog.Error(err.Error())
-		}
-	}
+	//if word.SoundFile != "" {
+	//	if err = c.ply.Play(word.SoundFile); err != nil {
+	//		slog.Error(err.Error())
+	//	}
+	//}
 	_, err = inputChar()
 	if err != nil {
 		return err
