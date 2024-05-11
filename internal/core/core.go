@@ -207,6 +207,7 @@ func (c *Core) Review() (err error) {
 		startedAt      = time.Now().Local()
 		know, notKnow  int
 		totalScore     int
+		counter        int
 	)
 
 	// TODO review history
@@ -236,6 +237,7 @@ func (c *Core) Review() (err error) {
 	fmt.Println("Press Enter to view word meaning")
 
 	for idx, word := range words {
+		counter += 1
 	review:
 		started := time.Now()
 		if err = c.ShowWord(idx, word); err != nil {
@@ -289,7 +291,7 @@ func (c *Core) Review() (err error) {
 		Duration:        time.Now().Sub(startedAt),
 		FromProficiency: fromKnw,
 		ToProficiency:   toKnw,
-		Total:           len(words),
+		Total:           counter,
 		Know:            know,
 		NotKnow:         notKnow,
 		Score:           totalScore,
