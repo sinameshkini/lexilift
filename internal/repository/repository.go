@@ -96,7 +96,7 @@ func (r *Repo) Fetch(fromKnw, toKnw, limit, offset int) (words []*models.Word, e
 }
 
 func (r *Repo) GetAll() (words []*models.Word, err error) {
-	if err = r.db.Find(&words).Error; err != nil {
+	if err = r.db.Order("score desc").Find(&words).Error; err != nil {
 		return
 	}
 

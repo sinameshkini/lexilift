@@ -17,7 +17,7 @@ type Review struct {
 	Total           int
 	Know            int
 	NotKnow         int
-	Score           int
+	Score           int `gorm:"default=0"`
 }
 
 type Word struct {
@@ -28,6 +28,7 @@ type Word struct {
 	Dict        *Dictionary
 	Proficiency int
 	ReviewCount int `gorm:"default=0"`
+	Score       int `gorm:"default=0"`
 }
 
 type Dictionary struct {

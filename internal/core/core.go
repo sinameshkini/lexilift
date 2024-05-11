@@ -26,6 +26,34 @@ type Core struct {
 	debug bool
 }
 
+func proficiencyScore(pfc int) int {
+	if pfc <= -16 {
+		return 10
+	} else if pfc >= 16 {
+		return 0
+	}
+
+	return (-1 * pfc / 3) + 5
+}
+
+func timeScore(t, limit int) int {
+	if t > limit {
+		return 0
+	} else if t == limit {
+		return 1
+	}
+
+	x := float64(10) / float64(limit)
+	return 10 - int(float64(t)*x)
+}
+
+func (c *Core) CalculateScore(t, pfc int) (score int) {
+	score += proficiencyScore(pfc)
+	score += timeScore(t, 20)
+
+	return
+}
+
 // func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
 
 func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
@@ -119,8 +147,13 @@ func (c *Core) Dashboard() (err error) {
 		return err
 	}
 
-	for _, w := range allWords {
+	fmt.Println("\nMost Score Words:")
+	for idx, w := range allWords {
 		knowMap[w.Proficiency] += 1
+
+		if idx < 5 {
+			fmt.Printf("\t%d- %s\t(Score: %d, Proficiency: %d)\n", idx+1, w.Word, w.Score, w.Proficiency)
+		}
 	}
 
 	for k := range knowMap {
@@ -131,7 +164,7 @@ func (c *Core) Dashboard() (err error) {
 		return sorted[i] < sorted[j]
 	})
 
-	fmt.Println("My Words:")
+	fmt.Println("\nMy Words:")
 	for _, i := range sorted {
 		kn := knowMap[i]
 		fmt.Printf("Proficiency: %d\t Count: %d\n", i, kn)
@@ -155,7 +188,7 @@ func (c *Core) Dashboard() (err error) {
 			continue
 		}
 
-		if idx == 2 {
+		if idx == 4 {
 			break
 		}
 	}
@@ -190,52 +223,8 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 	}
 
 	if err = c.repo.Create(*w); err != nil {
-		slog.Error("cannot save to DB:", err.Error())
+		return
 	}
-
-	return
-}
-
-func CalculateScore(lvl, t, pfc, rc, knw int) (score int) {
-
-	if t < 30 {
-		score += (30 - t) / lvl
-	}
-
-	if pfc > -50 && pfc < 50 {
-		score += -1 * pfc / (5 - lvl) * 3
-	}
-
-	if rc < 30 {
-		score += (50 - rc) / 30
-	}
-
-	score = score * knw
-
-	//// Define weights for each factor
-	//levelWeight := 2
-	//timeWeight := 1
-	//proficiencyWeight := 1
-	//reviewCountWeight := 1
-	//
-	//// Normalize time, proficiency, and review count to a scale of 0 to 1
-	//normalizedTime := t - 5/30 - 5
-	//normalizedProficiency := pfc + 50/50 + 50
-	//normalizedReviewCount := rc / 100
-	//
-	//// Calculate the total score using the weighted sum formula
-	//totalScore := lvl*levelWeight +
-	//	normalizedTime*timeWeight +
-	//	normalizedProficiency*proficiencyWeight +
-	//	normalizedReviewCount*reviewCountWeight
-	//
-	//totalScore = totalScore * knw
-	//// Ensure the total score is within the range of 0 to 10
-	//scr := float64(totalScore)
-	//
-	//scr = math.Max(0, math.Min(scr, 10))
-
-	//return int(scr)
 
 	return
 }
@@ -295,16 +284,17 @@ func (c *Core) Review() (err error) {
 			case '1':
 				word.Proficiency += 1
 				word.ReviewCount += 1
-				score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, 1)
+				score := c.CalculateScore(dur, word.Proficiency)
 				fmt.Printf("Score: %d", score)
 				totalScore += score
+				word.Score += score
 				know += 1
 			case '2':
 				word.Proficiency -= 1
 				word.ReviewCount += 1
-				score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, -1)
-				fmt.Printf("Score: %d", score)
-				totalScore += score
+				//score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, -1)
+				//fmt.Printf("Score: %d", score)
+				//totalScore += score
 				notKnow += 1
 			case 'a':
 				if err = c.AddNewWord(); err != nil {
@@ -455,7 +445,7 @@ func (c *Core) AddWordsList() (err error) {
 		}
 
 		if word, err = c.Save(w); err != nil {
-			slog.Error(fmt.Sprintf("cannot save %s, error:", w), err.Error())
+			slog.Error(fmt.Sprintf("cannot save %s, error:", w), err.Error(), "")
 			continue
 		}
 
