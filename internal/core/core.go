@@ -50,6 +50,7 @@ func timeScore(t, limit int) int {
 func (c *Core) CalculateScore(t, pfc int) (score int) {
 	score += proficiencyScore(pfc)
 	score += timeScore(t, 20)
+	score /= 2
 
 	return
 }
@@ -139,6 +140,7 @@ func (c *Core) Dashboard() (err error) {
 		knowMap       = make(map[int]int)
 		sorted        []int
 		totalDuration time.Duration
+		totalScore    int
 	)
 
 	fmt.Println(strings.Repeat(">", 32), "Dashboard", strings.Repeat("<", 32))
@@ -176,23 +178,20 @@ func (c *Core) Dashboard() (err error) {
 		return err
 	}
 
-	for _, r := range allReviews {
-		totalDuration += r.Duration
-	}
-
 	fmt.Println("\nMy Reviews:")
-	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
 	for idx, r := range allReviews {
-		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
-			slog.Error(err.Error())
-			continue
+		if idx < 5 {
+			if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
+				slog.Error(err.Error())
+				continue
+			}
 		}
 
-		if idx == 4 {
-			break
-		}
+		totalDuration += r.Duration
+		totalScore += r.Score
 	}
-
+	fmt.Printf("Total: %d, Duration: %s, Score: %d\n",
+		len(allReviews), totalDuration.Round(time.Second).String(), totalScore)
 	fmt.Println("")
 
 	return nil
@@ -258,57 +257,59 @@ func (c *Core) Review() (err error) {
 	printDiv()
 
 	fmt.Printf("%d words found\n", len(words))
-	if len(words) != 0 {
-		fmt.Println("Starting ...")
-		fmt.Println("Press Enter to view word meaning")
+	if len(words) == 0 {
+		return nil
+	}
 
-		for idx, word := range words {
-		review:
-			started := time.Now()
-			if err = c.ShowWord(idx, word); err != nil {
+	fmt.Println("Starting ...")
+	fmt.Println("Press Enter to view word meaning")
+
+	for idx, word := range words {
+	review:
+		started := time.Now()
+		if err = c.ShowWord(idx, word); err != nil {
+			slog.Error(err.Error())
+		}
+
+		fmt.Println("(1) I know, (2) I don't know, (0) nothing, (a) add a new word, (q) stop")
+		if input, err = inputChar(); err != nil {
+			return err
+		}
+
+		dur := int(time.Now().Sub(started).Round(time.Second).Seconds())
+
+		if input == 'q' {
+			break
+		}
+
+		switch input {
+		case '1':
+			word.Proficiency += 1
+			word.ReviewCount += 1
+			score := c.CalculateScore(dur, word.Proficiency)
+			fmt.Printf("Score: %d\n", score)
+			totalScore += score
+			word.Score += score
+			know += 1
+		case '2':
+			word.Proficiency -= 1
+			word.ReviewCount += 1
+			//score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, -1)
+			//fmt.Printf("Score: %d", score)
+			//totalScore += score
+			notKnow += 1
+		case 'a':
+			if err = c.AddNewWord(); err != nil {
 				slog.Error(err.Error())
 			}
 
-			fmt.Println("(1) I know, (2) I don't know, (0) nothing, (a) add a new word, (q) stop")
-			if input, err = inputChar(); err != nil {
-				return err
-			}
+			goto review
+		default:
+			continue
+		}
 
-			dur := int(time.Now().Sub(started).Round(time.Second).Seconds())
-
-			if input == 'q' {
-				break
-			}
-
-			switch input {
-			case '1':
-				word.Proficiency += 1
-				word.ReviewCount += 1
-				score := c.CalculateScore(dur, word.Proficiency)
-				fmt.Printf("Score: %d", score)
-				totalScore += score
-				word.Score += score
-				know += 1
-			case '2':
-				word.Proficiency -= 1
-				word.ReviewCount += 1
-				//score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, -1)
-				//fmt.Printf("Score: %d", score)
-				//totalScore += score
-				notKnow += 1
-			case 'a':
-				if err = c.AddNewWord(); err != nil {
-					slog.Error(err.Error())
-				}
-
-				goto review
-			default:
-				continue
-			}
-
-			if err = c.repo.Update(word); err != nil {
-				return err
-			}
+		if err = c.repo.Update(word); err != nil {
+			return err
 		}
 	}
 
@@ -459,6 +460,7 @@ func (c *Core) ReviewHistory() (err error) {
 	var (
 		allReviews    []*models.Review
 		totalDuration time.Duration
+		totalScore    int
 	)
 
 	if allReviews, err = c.repo.GetAllReviews(); err != nil {
@@ -468,12 +470,14 @@ func (c *Core) ReviewHistory() (err error) {
 	fmt.Println("\nMy Reviews:")
 	for idx, r := range allReviews {
 		totalDuration += r.Duration
+		totalScore += r.Score
 		if err = c.ShowReview(len(allReviews)-idx, r); err != nil {
 			slog.Error(err.Error())
 			continue
 		}
 	}
-	fmt.Printf("Total: %d, Duration: %s\n", len(allReviews), totalDuration.Round(time.Second).String())
+	fmt.Printf("Total: %d, Duration: %s Score: %d\n",
+		len(allReviews), totalDuration.Round(time.Second).String(), totalScore)
 
 	fmt.Println("")
 
