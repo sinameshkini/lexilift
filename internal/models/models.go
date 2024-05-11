@@ -17,6 +17,7 @@ type Review struct {
 	Total           int
 	Know            int
 	NotKnow         int
+	Score           int
 }
 
 type Word struct {

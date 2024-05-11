@@ -22,6 +22,7 @@ type Core struct {
 	repo *repository.Repo
 	dict *dictionary.API
 	//ply   *player.Player
+	level int
 	debug bool
 }
 
@@ -33,6 +34,7 @@ func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 		dict: dict,
 		//ply:   ply,
 		debug: debug,
+		level: 3,
 	}
 }
 
@@ -194,6 +196,50 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 	return
 }
 
+func CalculateScore(lvl, t, pfc, rc, knw int) (score int) {
+
+	if t < 30 {
+		score += (30 - t) / lvl
+	}
+
+	if pfc > -50 && pfc < 50 {
+		score += -1 * pfc / (5 - lvl) * 3
+	}
+
+	if rc < 30 {
+		score += (50 - rc) / 30
+	}
+
+	score = score * knw
+
+	//// Define weights for each factor
+	//levelWeight := 2
+	//timeWeight := 1
+	//proficiencyWeight := 1
+	//reviewCountWeight := 1
+	//
+	//// Normalize time, proficiency, and review count to a scale of 0 to 1
+	//normalizedTime := t - 5/30 - 5
+	//normalizedProficiency := pfc + 50/50 + 50
+	//normalizedReviewCount := rc / 100
+	//
+	//// Calculate the total score using the weighted sum formula
+	//totalScore := lvl*levelWeight +
+	//	normalizedTime*timeWeight +
+	//	normalizedProficiency*proficiencyWeight +
+	//	normalizedReviewCount*reviewCountWeight
+	//
+	//totalScore = totalScore * knw
+	//// Ensure the total score is within the range of 0 to 10
+	//scr := float64(totalScore)
+	//
+	//scr = math.Max(0, math.Min(scr, 10))
+
+	//return int(scr)
+
+	return
+}
+
 func (c *Core) Review() (err error) {
 	var (
 		words          []*models.Word
@@ -201,6 +247,7 @@ func (c *Core) Review() (err error) {
 		fromKnw, toKnw int
 		startedAt      = time.Now().Local()
 		know, notKnow  int
+		totalScore     int
 	)
 
 	// TODO review history
@@ -228,6 +275,7 @@ func (c *Core) Review() (err error) {
 
 		for idx, word := range words {
 		review:
+			started := time.Now()
 			if err = c.ShowWord(idx, word); err != nil {
 				slog.Error(err.Error())
 			}
@@ -237,6 +285,8 @@ func (c *Core) Review() (err error) {
 				return err
 			}
 
+			dur := int(time.Now().Sub(started).Round(time.Second).Seconds())
+
 			if input == 'q' {
 				break
 			}
@@ -245,10 +295,16 @@ func (c *Core) Review() (err error) {
 			case '1':
 				word.Proficiency += 1
 				word.ReviewCount += 1
+				score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, 1)
+				fmt.Printf("Score: %d", score)
+				totalScore += score
 				know += 1
 			case '2':
 				word.Proficiency -= 1
 				word.ReviewCount += 1
+				score := CalculateScore(c.level, dur, word.Proficiency, word.ReviewCount, -1)
+				fmt.Printf("Score: %d", score)
+				totalScore += score
 				notKnow += 1
 			case 'a':
 				if err = c.AddNewWord(); err != nil {
@@ -274,6 +330,7 @@ func (c *Core) Review() (err error) {
 		Total:           len(words),
 		Know:            know,
 		NotKnow:         notKnow,
+		Score:           totalScore,
 	}
 
 	if err = c.repo.CreateReview(review); err != nil {
@@ -284,7 +341,7 @@ func (c *Core) Review() (err error) {
 }
 
 func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
-	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\n",
+	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\tS:%d\n",
 		idx,
 		review.StartedAt.Format("2006-01-02 15:04"),
 		review.Duration.Round(time.Second).String(),
@@ -293,6 +350,7 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 		review.Total,
 		review.Know,
 		review.NotKnow,
+		review.Score,
 	)
 	return nil
 }
