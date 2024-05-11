@@ -26,35 +26,6 @@ type Core struct {
 	debug bool
 }
 
-func proficiencyScore(pfc int) int {
-	if pfc <= -16 {
-		return 10
-	} else if pfc >= 16 {
-		return 0
-	}
-
-	return (-1 * pfc / 3) + 5
-}
-
-func timeScore(t, limit int) int {
-	if t > limit {
-		return 0
-	} else if t == limit {
-		return 1
-	}
-
-	x := float64(10) / float64(limit)
-	return 10 - int(float64(t)*x)
-}
-
-func (c *Core) CalculateScore(t, pfc int) (score int) {
-	score += proficiencyScore(pfc)
-	score += timeScore(t, 20)
-	score /= 2
-
-	return
-}
-
 // func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
 
 func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
@@ -286,7 +257,7 @@ func (c *Core) Review() (err error) {
 		case '1':
 			word.Proficiency += 1
 			word.ReviewCount += 1
-			score := c.CalculateScore(dur, word.Proficiency)
+			score := c.CalculateScore(dur, word.Proficiency, word.ReviewCount)
 			fmt.Printf("Score: %d\n", score)
 			totalScore += score
 			word.Score += score
@@ -482,6 +453,43 @@ func (c *Core) ReviewHistory() (err error) {
 	fmt.Println("")
 
 	return nil
+}
+
+func (c *Core) CalculateScore(t, pfc, rc int) (score int) {
+	score += proficiencyScore(pfc)
+	score += timeScore(t, 20)
+	score += timeScore(rc, 10)
+	score /= 3
+
+	return
+}
+
+//
+//func reviewCountScore(rc, limit int) int {
+//	if rc > limit {
+//		return 0
+//	}
+//}
+
+func timeScore(t, limit int) int {
+	if t > limit {
+		return 0
+	} else if t == limit {
+		return 1
+	}
+
+	x := float64(10) / float64(limit)
+	return 10 - int(float64(t)*x)
+}
+
+func proficiencyScore(pfc int) int {
+	if pfc <= -16 {
+		return 10
+	} else if pfc >= 16 {
+		return 0
+	}
+
+	return (-1 * pfc / 3) + 5
 }
 
 func printDiv() {
