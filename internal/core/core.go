@@ -120,11 +120,19 @@ func (c *Core) Dashboard() (err error) {
 		return err
 	}
 
-	fmt.Println("Most Score Words:")
+	fmt.Println("Score Ranking:")
 	for idx, w := range allWords {
 		knowMap[w.Proficiency] += 1
 
 		if idx < 5 {
+			fmt.Printf("\t%d- %s\t(Score: %d, Proficiency: %d)\n", idx+1, w.Word, w.Score, w.Proficiency)
+		}
+
+		if idx == 5 {
+			fmt.Println("\t.")
+		}
+
+		if idx >= len(allWords)-5 && idx >= 5 {
 			fmt.Printf("\t%d- %s\t(Score: %d, Proficiency: %d)\n", idx+1, w.Word, w.Score, w.Proficiency)
 		}
 	}
