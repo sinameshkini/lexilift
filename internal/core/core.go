@@ -85,7 +85,7 @@ func (c *Core) About() (err error) {
 	banner := figure.NewFigure("LexiLift", "", true).String()
 	fmt.Println(banner)
 	fmt.Println("LexiLift is a free and open-source CLI app designed to help you learn any English word you want!")
-
+	fmt.Println("")
 	return nil
 }
 
@@ -120,7 +120,7 @@ func (c *Core) Dashboard() (err error) {
 		return err
 	}
 
-	fmt.Println("\nMost Score Words:")
+	fmt.Println("Most Score Words:")
 	for idx, w := range allWords {
 		knowMap[w.Proficiency] += 1
 
@@ -140,7 +140,7 @@ func (c *Core) Dashboard() (err error) {
 	fmt.Println("\nMy Words:")
 	for _, i := range sorted {
 		kn := knowMap[i]
-		fmt.Printf("Proficiency: %d\t Count: %d\n", i, kn)
+		fmt.Printf("\tProficiency: %d\t Count: %d\n", i, kn)
 	}
 
 	fmt.Printf("Total: %d\n", len(allWords))
