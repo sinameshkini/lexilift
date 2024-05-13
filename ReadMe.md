@@ -85,16 +85,26 @@ make build
 make run
 ```
 
+### Build
+#### Linux and Windows 
+```shell
+make build
+```
+before build for windows os binary (.exe) on linux host:
+```shell
+ sudo apt-get install gcc-mingw-w64 
+```
 ## To-Do List
 - [ ] Complete documentation
 - [ ] Test and finalize audio functionality
-- [ ] Build with tags
-- [ ] Build for all Golang-supported platforms
+- [x] Build with tags
+- [x] Build for Windows
+- [ ] Build for Android
 - [ ] Implement unit tests
 - [ ] Implement integration tests
 - [ ] Add multi-language support
 - [ ] Implement custom configuration (default language, word view, etc.)
-- [ ] Add word tags functionality
+- [x] Add word tags functionality
 - [ ] Implement management for user's words
 - [ ] Allow reviewing words by tags
 - [x] Display additional information such as creation date, pronunciation, synonyms, and antonyms of words in reviews

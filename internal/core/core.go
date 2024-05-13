@@ -64,6 +64,10 @@ func (c *Core) Handler() (err error) {
 		return c.AddWordsList()
 	case '4':
 		return c.ReviewHistory()
+	case '5':
+		return c.NewTag()
+	case '6':
+		return c.Tags()
 	case 'm':
 		return c.Menu()
 	case 'd':
@@ -97,6 +101,8 @@ func (c *Core) Menu() (err error) {
 	fmt.Println("\t2- Add a new word to my words")
 	fmt.Println("\t3- Add words list to my words")
 	fmt.Println("\t4- Review history")
+	fmt.Println("\t5- Add a new tag")
+	fmt.Println("\t6- Tags list")
 	fmt.Println("\tm- Menu")
 	fmt.Println("\td- Dashboard")
 	fmt.Println("\tc- Clear")
@@ -483,6 +489,36 @@ func (c *Core) ReviewHistory() (err error) {
 		len(allReviews), totalDuration.Round(time.Second).String(), totalScore)
 
 	fmt.Println("")
+
+	return nil
+}
+
+func (c *Core) NewTag() (err error) {
+	fmt.Print("Enter new tag name: ")
+	name, err := inputString()
+	if err != nil {
+		return
+	}
+
+	if err = c.repo.CreateTag(models.Tag{Name: name}); err != nil {
+		return
+	}
+
+	fmt.Println("\ttag added successfully")
+
+	return nil
+}
+
+func (c *Core) Tags() (err error) {
+	tags, err := c.repo.GetAllTags()
+	if err != nil {
+		return
+	}
+
+	fmt.Println("Tags List:")
+	for _, t := range tags {
+		fmt.Printf("\t1- %s (%d words)\n", t.Name, len(t.Words))
+	}
 
 	return nil
 }

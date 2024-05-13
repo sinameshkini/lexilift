@@ -118,3 +118,15 @@ func (r *Repo) Update(word *models.Word) (err error) {
 
 	return err
 }
+
+func (r *Repo) GetAllTags() (tags []*models.Tag, err error) {
+	if err = r.db.Find(&tags).Error; err != nil {
+		return
+	}
+
+	return
+}
+
+func (r *Repo) CreateTag(t models.Tag) (err error) {
+	return r.db.Create(&t).Error
+}

@@ -28,8 +28,15 @@ type Word struct {
 	SoundFile   string
 	Dict        *Dictionary
 	Proficiency int
-	ReviewCount int `gorm:"default=0"`
-	Score       int `gorm:"default=0"`
+	ReviewCount int    `gorm:"default=0"`
+	Score       int    `gorm:"default=0"`
+	Tags        []*Tag `gorm:"many2many:word_tag;"`
+}
+
+type Tag struct {
+	gorm.Model
+	Name  string
+	Words []*Word `gorm:"many2many:word_tag;"`
 }
 
 type Dictionary struct {
