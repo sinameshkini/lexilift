@@ -10,6 +10,7 @@ import (
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
 	"log/slog"
+	"math/rand"
 	"os"
 	"os/exec"
 	"runtime"
@@ -207,6 +208,13 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 	return
 }
 
+func shuffle(array []*models.Word) {
+	for i := len(array) - 1; i > 0; i-- { //run the loop from the end till the start
+		j := rand.Intn(i + 1)
+		array[i], array[j] = array[j], array[i] //swap the random element with the current element
+	}
+}
+
 func (c *Core) Review() (err error) {
 	var (
 		words          []*models.Word
@@ -233,6 +241,8 @@ func (c *Core) Review() (err error) {
 	if words, err = c.repo.Fetch(fromKnw, toKnw, 1000, 0); err != nil {
 		return err
 	}
+
+	shuffle(words)
 
 	printDiv()
 
@@ -580,4 +590,8 @@ func clearConsole() (err error) {
 	}
 
 	return
+}
+
+func random(low, hi int64) int64 {
+	return low + rand.Int63n(hi-low)
 }
