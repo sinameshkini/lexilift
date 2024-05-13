@@ -105,5 +105,5 @@ make run
 - [x] Add option to add a new word during review
 - [x] Show user's words sorted by proficiency
 - [x] Display total review duration in the dashboard
-
----
+- [x] review comment
+- [ ] manage reviews

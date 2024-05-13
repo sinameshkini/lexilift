@@ -18,6 +18,7 @@ type Review struct {
 	Know            int
 	NotKnow         int
 	Score           int `gorm:"default=0"`
+	Comment         string
 }
 
 type Word struct {

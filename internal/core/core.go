@@ -293,6 +293,16 @@ func (c *Core) Review() (err error) {
 			return err
 		}
 	}
+	fmt.Println("**")
+	fmt.Println("****")
+	fmt.Println("****** Congratulations, review completed")
+	fmt.Println("****")
+	fmt.Println("**")
+	fmt.Print("Please enter a comment: ")
+	comment, err := inputString()
+	if err != nil {
+		slog.Error(err.Error())
+	}
 
 	review := models.Review{
 		StartedAt:       startedAt,
@@ -303,6 +313,7 @@ func (c *Core) Review() (err error) {
 		Know:            know,
 		NotKnow:         notKnow,
 		Score:           totalScore,
+		Comment:         comment,
 	}
 
 	if err = c.repo.CreateReview(review); err != nil {
@@ -313,7 +324,7 @@ func (c *Core) Review() (err error) {
 }
 
 func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
-	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\tS:%d\n",
+	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\tS:%d\tCM:%s\n",
 		idx,
 		review.StartedAt.Format("2006-01-02 15:04"),
 		review.Duration.Round(time.Second).String(),
@@ -323,6 +334,7 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 		review.Know,
 		review.NotKnow,
 		review.Score,
+		review.Comment,
 	)
 	return nil
 }
