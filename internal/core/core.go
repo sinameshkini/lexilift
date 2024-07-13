@@ -9,6 +9,8 @@ import (
 	"lexilift/internal/models"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
+	"lexilift/pkg/player"
+	"lexilift/pkg/utils"
 	"log/slog"
 	"math/rand"
 	"os"
@@ -20,20 +22,19 @@ import (
 )
 
 type Core struct {
-	repo *repository.Repo
-	dict *dictionary.API
-	//ply   *player.Player
+	repo  *repository.Repo
+	dict  *dictionary.API
+	ply   *player.Player
 	level int
 	debug bool
 }
 
-// func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
-
-func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
+func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
+	//func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 	return &Core{
-		repo: repo,
-		dict: dict,
-		//ply:   ply,
+		repo:  repo,
+		dict:  dict,
+		ply:   ply,
 		debug: debug,
 		level: 3,
 	}
@@ -68,6 +69,8 @@ func (c *Core) Handler() (err error) {
 		return c.NewTag()
 	case '6':
 		return c.Tags()
+	case '7':
+		return c.Completion()
 	case 'm':
 		return c.Menu()
 	case 'd':
@@ -103,6 +106,7 @@ func (c *Core) Menu() (err error) {
 	fmt.Println("\t4- Review history")
 	fmt.Println("\t5- Add a new tag")
 	fmt.Println("\t6- Tags list")
+	fmt.Println("\t7- Completion words archive")
 	fmt.Println("\tm- Menu")
 	fmt.Println("\td- Dashboard")
 	fmt.Println("\tc- Clear")
@@ -366,11 +370,11 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 
 	fmt.Printf("Created at: %s, Reviewed: %d, Proficiency: %d)\n",
 		word.CreatedAt.Format("2006-01-02 15:04"), word.ReviewCount, word.Proficiency)
-	//if word.SoundFile != "" {
-	//	if err = c.ply.Play(word.SoundFile); err != nil {
-	//		slog.Error(err.Error())
-	//	}
-	//}
+	if word.SoundFile != "" {
+		if err = c.ply.Play(word.SoundFile); err != nil {
+			slog.Error(err.Error())
+		}
+	}
 	_, err = inputChar()
 	if err != nil {
 		return err
@@ -518,6 +522,43 @@ func (c *Core) Tags() (err error) {
 	fmt.Println("Tags List:")
 	for _, t := range tags {
 		fmt.Printf("\t1- %s (%d words)\n", t.Name, len(t.Words))
+	}
+
+	return nil
+}
+
+func (c *Core) Completion() (err error) {
+	words, err := c.repo.GetAll()
+	if err != nil {
+		return
+	}
+
+	fmt.Println("Tags List:")
+	for _, w := range words {
+		if w.SoundFile != "" {
+			continue
+		}
+
+		if w.Dict != nil && len(w.Dict.Phonetics) != 0 {
+			link := w.Dict.Phonetics[0].Audio
+			if link == "" {
+				continue
+			}
+
+			fmt.Printf("downloading sound file from: %s\n", link)
+			sound := fmt.Sprintf("audios/%s.mp3", w.Word)
+			if err = utils.DownloadFile(link, sound); err != nil {
+				slog.Error(err.Error())
+				sound = ""
+			}
+
+			if sound != "" {
+				w.SoundFile = sound
+				if err = c.repo.Update(w); err != nil {
+					slog.Error(err.Error())
+				}
+			}
+		}
 	}
 
 	return nil

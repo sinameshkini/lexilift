@@ -58,6 +58,16 @@ My Reviews:
 
 To install LexiLift, visit the release page: [LexiLift Releases](https://github.com/sinameshkini/lexilift/releases), download the executable binary file, and run it in your terminal.
 
+## Run
+### open your terminal (console)
+**Windows:** 
+- search **cmd** in start and open cmd.exe
+- type this:
+```shell
+cd <path-to-folder>
+lexilift<version>.exe
+```
+
 ## Installation for Developers
 
 ### Install Dependencies
@@ -108,12 +118,14 @@ before build for windows os binary (.exe) on linux host:
 - [ ] Implement management for user's words
 - [ ] Allow reviewing words by tags
 - [x] Display additional information such as creation date, pronunciation, synonyms, and antonyms of words in reviews
-- [ ] Implement data completion for words operation
+- [x] Implement data completion for words operation
 - [ ] Add import/export functionality for words
 - [x] Calculate score in reviews
 - [x] Track review count for each word
 - [x] Add option to add a new word during review
 - [x] Show user's words sorted by proficiency
 - [x] Display total review duration in the dashboard
-- [x] review comment
-- [ ] manage reviews
+- [x] Review comment
+- [ ] Manage reviews
+- [ ] Dictionary plugin
+- [ ] Fetch words by filter and limit in review
