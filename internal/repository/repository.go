@@ -1,62 +1,31 @@
 package repository
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"lexilift/internal/models"
-	"log"
 	"log/slog"
-	"os"
-	"time"
+
+	"github.com/sinameshkini/microkit/pkg/clients/database"
+	"gorm.io/gorm"
+
+	"lexilift/internal/config"
+	"lexilift/internal/models"
 )
 
 type Repo struct {
 	db *gorm.DB
 }
 
-func New(debug bool) (repo *Repo, err error) {
-	var (
-		newLogger logger.Interface
-	)
-
-	if debug {
-		newLogger = logger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-			logger.Config{
-				SlowThreshold:             time.Second, // Slow SQL threshold
-				LogLevel:                  logger.Info, // Log level
-				IgnoreRecordNotFoundError: false,       // Ignore ErrRecordNotFound error for logger
-				Colorful:                  true,        // Disable color
-			},
-		)
-	} else {
-		newLogger = logger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-			logger.Config{
-				SlowThreshold:             time.Second,  // Slow SQL threshold
-				LogLevel:                  logger.Error, // Log level
-				IgnoreRecordNotFoundError: true,         // Ignore ErrRecordNotFound error for logger
-				Colorful:                  true,         // Disable color
-			},
-		)
-	}
-	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{
-		Logger: newLogger,
-	})
+func New(conf *config.Config) (repo *Repo, err error) {
+	db, err := database.NewSQLite(conf.DatabasePath, conf.Debug)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	if err = db.Migrator().AutoMigrate(
-		&models.Word{},
-		&models.Review{},
-	); err != nil {
+	if err = database.Migrate(db.DB(), models.AllTables); err != nil {
 		slog.Error(err.Error())
 	}
 
 	repo = &Repo{
-		db: db,
+		db: db.DB(),
 	}
 
 	return

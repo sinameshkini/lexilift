@@ -1,0 +1,3 @@
+Debug: true
+ListenAddress: ":5050"
+DatabasePath: "gorm.db"

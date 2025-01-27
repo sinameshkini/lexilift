@@ -1,6 +1,7 @@
 package app
 
 import (
+	"lexilift/internal/config"
 	"lexilift/internal/core"
 	"lexilift/internal/repository"
 	"lexilift/pkg/dictionary"
@@ -19,7 +20,10 @@ func Run(debug bool) error {
 		//repo  *repository.Repo
 	)
 
-	if repo, err = repository.New(debug); err != nil {
+	if repo, err = repository.New(&config.Config{
+		Debug:        debug,
+		DatabasePath: "gorm.db",
+	}); err != nil {
 		return err
 	}
 

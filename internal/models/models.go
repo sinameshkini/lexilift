@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+var AllTables = []interface{}{
+	Word{},
+	Review{},
+}
+
 type Review struct {
 	StartedAt       time.Time
 	Duration        time.Duration
