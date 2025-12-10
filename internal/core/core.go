@@ -2,12 +2,13 @@ package core
 
 import (
 	"bufio"
-	"errors"
+	"context"
 	"fmt"
 	gt "github.com/bas24/googletranslatefree"
 	"github.com/common-nighthawk/go-figure"
-	"lexilift/internal/models"
+	"gorm.io/gorm"
 	"lexilift/internal/repository"
+	"lexilift/internal/repository/entities"
 	"lexilift/pkg/dictionary"
 	"lexilift/pkg/player"
 	"lexilift/pkg/utils"
@@ -22,6 +23,7 @@ import (
 )
 
 type Core struct {
+	db    *gorm.DB
 	repo  *repository.Repo
 	dict  *dictionary.API
 	ply   *player.Player
@@ -29,9 +31,10 @@ type Core struct {
 	debug bool
 }
 
-func New(repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
+func New(db *gorm.DB, repo *repository.Repo, dict *dictionary.API, ply *player.Player, debug bool) *Core {
 	//func New(repo *repository.Repo, dict *dictionary.API, debug bool) *Core {
 	return &Core{
+		db:    db,
 		repo:  repo,
 		dict:  dict,
 		ply:   ply,
@@ -117,8 +120,8 @@ func (c *Core) Menu() (err error) {
 
 func (c *Core) Dashboard() (err error) {
 	var (
-		allWords      []*models.Word
-		allReviews    []*models.Review
+		allWords      []*entities.Word
+		allReviews    []*entities.Review
 		knowMap       = make(map[int]int)
 		sorted        []int
 		totalDuration time.Duration
@@ -187,10 +190,10 @@ func (c *Core) Dashboard() (err error) {
 	return nil
 }
 
-func (c *Core) Save(word string) (w *models.Word, err error) {
+func (c *Core) Save(word string) (w *entities.Word, err error) {
 	var (
 		mean  string
-		dict  *models.Dictionary
+		dict  *entities.Dictionary
 		sound string
 	)
 
@@ -204,7 +207,7 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 		return
 	}
 
-	w = &models.Word{
+	w = &entities.Word{
 		Word:      word,
 		Mean:      mean,
 		Dict:      dict,
@@ -218,7 +221,7 @@ func (c *Core) Save(word string) (w *models.Word, err error) {
 	return
 }
 
-func shuffle(array []*models.Word) {
+func shuffle(array []*entities.Word) {
 	for i := len(array) - 1; i > 0; i-- { //run the loop from the end till the start
 		j := rand.Intn(i + 1)
 		array[i], array[j] = array[j], array[i] //swap the random element with the current element
@@ -227,7 +230,7 @@ func shuffle(array []*models.Word) {
 
 func (c *Core) Review() (err error) {
 	var (
-		words          []*models.Word
+		words          []*entities.Word
 		input          rune
 		fromKnw, toKnw int
 		startedAt      = time.Now().Local()
@@ -324,7 +327,7 @@ func (c *Core) Review() (err error) {
 		slog.Error(err.Error())
 	}
 
-	review := models.Review{
+	review := entities.Review{
 		StartedAt:       startedAt,
 		Duration:        time.Now().Sub(startedAt),
 		FromProficiency: fromKnw,
@@ -343,7 +346,7 @@ func (c *Core) Review() (err error) {
 	return
 }
 
-func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
+func (c *Core) ShowReview(idx int, review *entities.Review) (err error) {
 	fmt.Printf("%d- %s  %s\tFP:%d\tTP:%d\tCNT:%d\tKNW:%d\tNK:%d\tS:%d\tCM:%s\n",
 		idx,
 		review.StartedAt.Format("2006-01-02 15:04"),
@@ -359,7 +362,7 @@ func (c *Core) ShowReview(idx int, review *models.Review) (err error) {
 	return nil
 }
 
-func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
+func (c *Core) ShowWord(idx int, word *entities.Word) (err error) {
 	printDiv()
 	fmt.Printf("\t%d- %s\n",
 		idx+1, word.Word)
@@ -414,7 +417,7 @@ func (c *Core) ShowWord(idx int, word *models.Word) (err error) {
 func (c *Core) AddNewWord() (err error) {
 	var (
 		input string
-		word  *models.Word
+		word  *entities.Word
 	)
 
 	printDiv()
@@ -423,12 +426,8 @@ func (c *Core) AddNewWord() (err error) {
 		return err
 	}
 
-	if word, err = c.repo.Get(input); err == nil {
-		return errors.New("already exist")
-	}
-
-	if word, err = c.Save(input); err != nil {
-		return err
+	if word, err = c.AddWord(context.Background(), input); err == nil {
+		return
 	}
 
 	fmt.Printf("*** %s added successfuly!\n", strings.ToUpper(word.Word))
@@ -443,7 +442,7 @@ func (c *Core) AddNewWord() (err error) {
 func (c *Core) AddWordsList() (err error) {
 	var (
 		input []string
-		word  *models.Word
+		word  *entities.Word
 	)
 
 	printDiv()
@@ -471,7 +470,7 @@ func (c *Core) AddWordsList() (err error) {
 
 func (c *Core) ReviewHistory() (err error) {
 	var (
-		allReviews    []*models.Review
+		allReviews    []*entities.Review
 		totalDuration time.Duration
 		totalScore    int
 	)
@@ -504,7 +503,7 @@ func (c *Core) NewTag() (err error) {
 		return
 	}
 
-	if err = c.repo.CreateTag(models.Tag{Name: name}); err != nil {
+	if err = c.repo.CreateTag(entities.Tag{Name: name}); err != nil {
 		return
 	}
 

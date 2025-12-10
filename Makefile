@@ -3,7 +3,10 @@
 run:
 	go run .
 
-build: linux windows
+build:
+	go build -o build/lexilift .
+
+build-platform: linux windows
 
 linux:
 	@bash -c '\

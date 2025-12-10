@@ -3,7 +3,7 @@ package dictionary
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"lexilift/internal/models"
+	"lexilift/internal/repository/entities"
 	"lexilift/pkg/utils"
 	"log/slog"
 )
@@ -20,9 +20,9 @@ func New(debug bool) *API {
 	}
 }
 
-func (d *API) Find(word string) (dict *models.Dictionary, sound string, err error) {
+func (d *API) Find(word string) (dict *entities.Dictionary, sound string, err error) {
 
-	var dictResp []*models.Dictionary
+	var dictResp []*entities.Dictionary
 
 	if _, err = d.rc.R().SetResult(&dictResp).Get(fmt.Sprintf("/%s", word)); err != nil {
 		return
@@ -32,11 +32,14 @@ func (d *API) Find(word string) (dict *models.Dictionary, sound string, err erro
 		dict = dictResp[0]
 		if len(dict.Phonetics) != 0 {
 			link := dict.Phonetics[0].Audio
-			fmt.Printf("downloading sound file from: %s\n", link)
-			sound = fmt.Sprintf("audios/%s.mp3", word)
-			if err = utils.DownloadFile(link, sound); err != nil {
-				slog.Error(err.Error())
-				sound = ""
+			if link != "" {
+				fmt.Printf("downloading sound file from: %s\n", link)
+				sound = fmt.Sprintf("audios/%s.mp3", word)
+				if err = utils.DownloadFile(link, sound); err != nil {
+					slog.Error(err.Error())
+					sound = ""
+					err = nil
+				}
 			}
 		}
 	}

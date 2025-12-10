@@ -1,9 +1,10 @@
 package app
 
 import (
-	"lexilift/internal/config"
+	"github.com/sinameshkini/microkit/pkg/clients/database"
 	"lexilift/internal/core"
 	"lexilift/internal/repository"
+	"lexilift/internal/repository/entities"
 	"lexilift/pkg/dictionary"
 	"lexilift/pkg/player"
 	"log/slog"
@@ -16,14 +17,18 @@ func Run(debug bool) error {
 		dict *dictionary.API
 		ply  *player.Player
 		c    *core.Core
-		//word  *models.Word
-		//repo  *repository.Repo
 	)
 
-	if repo, err = repository.New(&config.Config{
-		Debug:        debug,
-		DatabasePath: "gorm.db",
-	}); err != nil {
+	db, err := database.NewSQLite("gorm.db", debug)
+	if err != nil {
+		return err
+	}
+
+	if err = database.Migrate(db.DB(), entities.AllTables); err != nil {
+		slog.Error(err.Error())
+	}
+
+	if repo, err = repository.New(db.DB()); err != nil {
 		return err
 	}
 
@@ -33,8 +38,7 @@ func Run(debug bool) error {
 		return err
 	}
 
-	c = core.New(repo, dict, ply, debug)
-	//c = core.New(repo, dict, debug)
+	c = core.New(db.DB(), repo, dict, ply, debug)
 
 	if err = c.About(); err != nil {
 		return err

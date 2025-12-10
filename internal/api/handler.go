@@ -26,6 +26,14 @@ func Init(conf *config.Config, c *core.Core) (err error) {
 
 	api.Get("/status", h.status)
 
+	api.Get("/dashboard", h.dashboard)
+
+	// Words
+	api.Get("/words", h.fetchWords)
+	api.Post("/words", h.addWord)
+
+	api.Get("/reviews", h.fetchReviews)
+
 	return app.Listen(conf.ListenAddress)
 }
 

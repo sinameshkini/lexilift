@@ -1,4 +1,4 @@
-package models
+package entities
 
 import (
 	"database/sql/driver"
@@ -28,20 +28,20 @@ type Review struct {
 
 type Word struct {
 	gorm.Model
-	Word        string
-	Mean        string
-	SoundFile   string
-	Dict        *Dictionary
-	Proficiency int
-	ReviewCount int    `gorm:"default=0"`
-	Score       int    `gorm:"default=0"`
-	Tags        []*Tag `gorm:"many2many:word_tag;"`
+	Word        string      `json:"word"`
+	Mean        string      `json:"mean"`
+	SoundFile   string      `json:"soundFile"`
+	Dict        *Dictionary `json:"dict"`
+	Proficiency int         `json:"proficiency"`
+	ReviewCount int         `json:"reviewCount" gorm:"default=0"`
+	Score       int         `json:"score" gorm:"default=0"`
+	Tags        []*Tag      `json:"tags" gorm:"many2many:word_tag;"`
 }
 
 type Tag struct {
 	gorm.Model
-	Name  string
-	Words []*Word `gorm:"many2many:word_tag;"`
+	Name  string  `json:"name"`
+	Words []*Word `json:"words" gorm:"many2many:word_tag;"`
 }
 
 type Dictionary struct {
