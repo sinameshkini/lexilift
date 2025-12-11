@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sinameshkini/microkit/models"
 	"gorm.io/gorm"
 	"time"
 )
@@ -15,6 +16,7 @@ var AllTables = []interface{}{
 }
 
 type Review struct {
+	ID              models.IID
 	StartedAt       time.Time
 	Duration        time.Duration
 	FromProficiency int
@@ -36,6 +38,14 @@ type Word struct {
 	ReviewCount int         `json:"reviewCount" gorm:"default=0"`
 	Score       int         `json:"score" gorm:"default=0"`
 	Tags        []*Tag      `json:"tags" gorm:"many2many:word_tag;"`
+}
+
+func (m *Word) AfterFind(tx *gorm.DB) (err error) {
+	if m.SoundFile != "" {
+		m.SoundFile = "http://localhost:5050/" + m.SoundFile
+	}
+
+	return nil
 }
 
 type Tag struct {

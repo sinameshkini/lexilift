@@ -12,7 +12,7 @@ import (
 )
 
 func Server(conf *config.Config) (err error) {
-	db, err := database.NewSQLite(conf.DatabasePath, conf.Debug)
+	db, err := database.NewDBWithDsn("host=localhost user=admin password=admin dbname=lexilift port=5432 sslmode=disable", true)
 	if err != nil {
 		return err
 	}

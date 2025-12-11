@@ -19,7 +19,8 @@ func Run(debug bool) error {
 		c    *core.Core
 	)
 
-	db, err := database.NewSQLite("gorm.db", debug)
+	db, err := database.NewDBWithDsn("host=localhost user=admin password=admin dbname=lexilift port=5432 sslmode=disable", debug)
+	//db, err := database.NewSQLite("gorm.db", debug)
 	if err != nil {
 		return err
 	}

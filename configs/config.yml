@@ -1,3 +1,5 @@
 Debug: true
 ListenAddress: ":5050"
 DatabasePath: "gorm.db"
+BaseURL: "http://localhost:5050"
+APIPrefix: "/api/v1"
