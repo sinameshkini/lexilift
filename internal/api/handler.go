@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -35,6 +36,7 @@ func Init(conf *config.Config, c *core.Core) (err error) {
 	// Words
 	api.Get("/words", h.fetchWords)
 	api.Post("/words", h.addWord)
+	api.Get("/words/rand", h.addRandomWord)
 
 	// Reviews
 	api.Get("/reviews", h.fetchReviews)
@@ -72,7 +74,11 @@ func response(c *fiber.Ctx, data, meta any) error {
 }
 
 func responseError(c *fiber.Ctx, err error) error {
-	return c.Status(fiber.StatusInternalServerError).JSON(models.Response{
+	status := fiber.StatusInternalServerError
+	if errors.Is(err, models.ErrNotfound) {
+		status = fiber.StatusNotFound
+	}
+	return c.Status(status).JSON(models.Response{
 		Message: err.Error(),
 	})
 }

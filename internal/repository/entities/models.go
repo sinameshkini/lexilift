@@ -14,6 +14,7 @@ var AllTables = []interface{}{
 	Word{},
 	Review{},
 	ReviewWords{},
+	Tag{},
 }
 
 type Review struct {
@@ -23,12 +24,31 @@ type Review struct {
 	FromProficiency int
 	ToProficiency   int
 	Total           int
+	CurrentIndex    int
 	Know            int
 	NotKnow         int
 	Score           int `gorm:"default=0"`
 	Comment         string
+	Status          ReviewStatus
 	Words           []*ReviewWords
 }
+
+func (m Review) CurrentWord() *ReviewWords {
+	for _, w := range m.Words {
+		if w.Status == RWWaiting {
+			return w
+		}
+	}
+
+	return nil
+}
+
+type ReviewStatus string
+
+const (
+	Started  ReviewStatus = "started"
+	Finished ReviewStatus = "finished"
+)
 
 type Word struct {
 	models.ModelIID
@@ -43,19 +63,31 @@ type Word struct {
 }
 
 type ReviewWords struct {
-	models.ModelIID
-	ReviewID models.IID
-	Review   *Review
-	WordID   models.IID
-	Word     *Word
-	Status   ReviewWordStatus
-	Index    int
+	ID         models.IID
+	CreatedAt  time.Time
+	StartedAt  *time.Time
+	FinishedAt *time.Time
+	ReviewID   models.IID
+	Review     *Review
+	WordID     models.IID
+	Word       *Word
+	Status     ReviewWordStatus
+	Index      int
+}
+
+func (m *ReviewWords) Duration() int {
+	if m.StartedAt == nil || m.FinishedAt == nil {
+		return 0
+	}
+
+	return int(m.FinishedAt.Sub(*m.StartedAt).Round(time.Second).Seconds())
 }
 
 type ReviewWordStatus string
 
 const (
-	None      ReviewWordStatus = ""
+	RWNone    ReviewWordStatus = ""
+	RWWaiting ReviewWordStatus = "waiting"
 	RWKnown   ReviewWordStatus = "known"
 	RWUnknown ReviewWordStatus = "unknown"
 	RWSkipped ReviewWordStatus = "skipped"

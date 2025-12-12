@@ -6,6 +6,7 @@ import (
 	"lexilift/internal/repository"
 	"lexilift/internal/repository/entities"
 	"lexilift/pkg/dictionary"
+	"lexilift/pkg/ollama"
 	"lexilift/pkg/player"
 	"log/slog"
 )
@@ -39,7 +40,9 @@ func Run(debug bool) error {
 		return err
 	}
 
-	c = core.New(db.DB(), repo, dict, ply, debug)
+	llm := ollama.New("http://localhost:11434/api", "gemma3", true)
+
+	c = core.New(db.DB(), repo, dict, ply, llm, debug)
 
 	if err = c.About(); err != nil {
 		return err

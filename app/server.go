@@ -6,19 +6,14 @@ import (
 	"lexilift/internal/config"
 	"lexilift/internal/core"
 	"lexilift/internal/repository"
-	"lexilift/internal/repository/entities"
 	"lexilift/pkg/dictionary"
-	"log/slog"
+	"lexilift/pkg/ollama"
 )
 
 func Server(conf *config.Config) (err error) {
 	db, err := database.NewDBWithDsn("host=localhost user=admin password=admin dbname=lexilift port=5432 sslmode=disable", true)
 	if err != nil {
 		return err
-	}
-
-	if err = database.Migrate(db.DB(), entities.AllTables); err != nil {
-		slog.Error(err.Error())
 	}
 
 	repo, err := repository.New(db.DB())
@@ -28,7 +23,13 @@ func Server(conf *config.Config) (err error) {
 
 	dict := dictionary.New(conf.Debug)
 
-	c := core.New(db.DB(), repo, dict, nil, conf.Debug)
+	llm := ollama.New("http://localhost:11434/api", "gemma3:4b", true)
+
+	c := core.New(db.DB(), repo, dict, nil, llm, conf.Debug)
+
+	if err = c.ReloadWords(); err != nil {
+		return err
+	}
 
 	return api.Init(conf, c)
 }

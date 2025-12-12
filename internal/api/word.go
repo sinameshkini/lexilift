@@ -41,3 +41,29 @@ func (h *handler) addWord(c *fiber.Ctx) (err error) {
 
 	return response(c, resp, nil)
 }
+
+func (h *handler) addRandomWord(c *fiber.Ctx) (err error) {
+	var (
+		ctx = c.Context()
+	)
+
+	resp, err := h.c.AddRandomWord(ctx)
+	if err != nil {
+		return responseError(c, err)
+	}
+
+	return response(c, resp, nil)
+}
+
+func (h *handler) getRandomWord(c *fiber.Ctx) (err error) {
+	var (
+		ctx = c.Context()
+	)
+
+	resp, err := h.c.GetRandomWord(ctx)
+	if err != nil {
+		return responseError(c, err)
+	}
+
+	return response(c, resp, nil)
+}

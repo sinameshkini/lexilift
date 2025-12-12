@@ -2,35 +2,55 @@ package core
 
 import (
 	"context"
+	"errors"
+
 	"github.com/sinameshkini/microkit/models"
 	"github.com/sinameshkini/microkit/pkg/genericrepo"
 	"lexilift/internal/repository/entities"
 	"lexilift/pkg/endpoint"
+	"time"
 )
 
-func (c *Core) FetchReviews(ctx context.Context, req *models.Request) (resp []entities.Review, meta *models.PaginationResponse, err error) {
+func (c *Core) FetchReviews(ctx context.Context, req *models.Request) (resp []endpoint.Review, meta *models.PaginationResponse, err error) {
 	repo := genericrepo.New[entities.Review](c.db)
 	reviews, meta, err := repo.GetAll(ctx, req)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return *reviews, meta, nil
+	for _, r := range *reviews {
+		resp = append(resp, endpoint.MakeReview(r))
+	}
+
+	return resp, meta, nil
 }
 
 func (c *Core) StartReview(ctx context.Context, req *endpoint.StartReviewRequest) (resp *endpoint.StartReviewResponse, err error) {
-	repo := genericrepo.New[entities.Review](c.db)
-	rwrepo := genericrepo.New[entities.ReviewWords](c.db)
+	var (
+		repo    = genericrepo.New[entities.Review](c.db)
+		rwrepo  = genericrepo.New[entities.ReviewWords](c.db)
+		started = time.Now()
+	)
 
 	words, err := c.repo.Fetch(req.FromProficiency, req.ToProficiency, 1000, 0)
 	if err != nil {
 		return
 	}
 
+	if len(words) == 0 {
+		return nil, errors.New("no word existed in this range")
+	}
+
+	if req.Shuffle {
+		shuffle(words)
+	}
+
 	review := entities.Review{
+		StartedAt:       started,
 		FromProficiency: req.FromProficiency,
 		ToProficiency:   req.ToProficiency,
 		Total:           len(words),
+		Status:          entities.Started,
 	}
 
 	if err = repo.Add(&review, ctx); err != nil {
@@ -41,8 +61,12 @@ func (c *Core) StartReview(ctx context.Context, req *endpoint.StartReviewRequest
 		reviewWord := entities.ReviewWords{
 			ReviewID: review.ID,
 			WordID:   word.ID,
-			Status:   entities.None,
+			Status:   entities.RWNone,
 			Index:    idx,
+		}
+
+		if idx == 0 {
+			reviewWord.Status = entities.RWWaiting
 		}
 
 		if err = rwrepo.Add(&reviewWord, ctx); err != nil {
@@ -67,39 +91,29 @@ func (c *Core) GetReview(ctx context.Context, reviewID models.IID) (resp *endpoi
 	resp = &endpoint.ReviewResponse{
 		Review:           *review,
 		CurrentWordIndex: -1,
-		//Words:
 	}
 
-	for idx, word := range review.Words {
-		if word.Status == entities.None {
-			resp.CurrentWordIndex = idx
-			break
-		}
-	}
+	total := int64(len(resp.Words))
 
-	meta = models.MakePaginationResponse(int64(len(resp.Words)), int64(resp.CurrentWordIndex+1), 1)
+	if current := resp.CurrentWord(); current != nil {
+		resp.CurrentWordIndex = current.Index
+		meta = models.MakePaginationResponse(total, int64(resp.CurrentWordIndex+1), 1)
+	} else {
+		meta = models.MakePaginationResponse(total, total, 1)
+	}
 
 	return
 }
 
 func (c *Core) NextWord(ctx context.Context, req *endpoint.NextWordRequest) (resp *endpoint.ReviewResponse, meta *models.PaginationResponse, err error) {
-	review, err := c.repo.GetReview(ctx, req.ReviewID)
+	if err = c.repo.SubmitWord(ctx, req); err != nil {
+		return
+	}
+
+	resp, meta, err = c.GetReview(ctx, req.ReviewID)
 	if err != nil {
 		return
 	}
 
-	var rw *entities.ReviewWords
-
-	for _, word := range review.Words {
-		if word.Status == entities.None {
-			rw = word
-			break
-		}
-	}
-
-	if err = c.repo.SubmitWord(ctx, rw.ID, req.Status); err != nil {
-		return
-	}
-
-	return c.GetReview(ctx, req.ReviewID)
+	return
 }

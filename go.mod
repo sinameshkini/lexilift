@@ -1,6 +1,8 @@
 module lexilift
 
-go 1.22.0
+go 1.23.0
+
+toolchain go1.23.1
 
 require (
 	github.com/bas24/googletranslatefree v0.0.0-20231117033553-f5859fe54d30
@@ -11,9 +13,11 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/pkg/errors v0.9.1
 	github.com/sinameshkini/microkit v0.1.5
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	gorm.io/gorm v1.25.10
+	resty.dev/v3 v3.0.0-beta.4
 )
 
 require (
@@ -35,6 +39,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -54,10 +59,10 @@ require (
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/postgres v1.3.9 // indirect
