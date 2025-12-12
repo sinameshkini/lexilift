@@ -13,6 +13,7 @@ import (
 var AllTables = []interface{}{
 	Word{},
 	Review{},
+	ReviewWords{},
 }
 
 type Review struct {
@@ -26,10 +27,11 @@ type Review struct {
 	NotKnow         int
 	Score           int `gorm:"default=0"`
 	Comment         string
+	Words           []*ReviewWords
 }
 
 type Word struct {
-	gorm.Model
+	models.ModelIID
 	Word        string      `json:"word"`
 	Mean        string      `json:"mean"`
 	SoundFile   string      `json:"soundFile"`
@@ -39,6 +41,25 @@ type Word struct {
 	Score       int         `json:"score" gorm:"default=0"`
 	Tags        []*Tag      `json:"tags" gorm:"many2many:word_tag;"`
 }
+
+type ReviewWords struct {
+	models.ModelIID
+	ReviewID models.IID
+	Review   *Review
+	WordID   models.IID
+	Word     *Word
+	Status   ReviewWordStatus
+	Index    int
+}
+
+type ReviewWordStatus string
+
+const (
+	None      ReviewWordStatus = ""
+	RWKnown   ReviewWordStatus = "known"
+	RWUnknown ReviewWordStatus = "unknown"
+	RWSkipped ReviewWordStatus = "skipped"
+)
 
 func (m *Word) AfterFind(tx *gorm.DB) (err error) {
 	if m.SoundFile != "" {

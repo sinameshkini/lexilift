@@ -9,6 +9,7 @@ require (
 	github.com/go-resty/resty/v2 v2.12.0
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/hajimehoshi/go-mp3 v0.3.4
+	github.com/pkg/errors v0.9.1
 	github.com/sinameshkini/microkit v0.1.5
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1

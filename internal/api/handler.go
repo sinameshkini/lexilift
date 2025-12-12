@@ -36,8 +36,11 @@ func Init(conf *config.Config, c *core.Core) (err error) {
 	api.Get("/words", h.fetchWords)
 	api.Post("/words", h.addWord)
 
+	// Reviews
 	api.Get("/reviews", h.fetchReviews)
 	api.Post("/reviews", h.startReview)
+	api.Get("/reviews/:id", h.getReview)
+	api.Post("/reviews/:id/next", h.nextWord)
 
 	return app.Listen(conf.ListenAddress)
 }
