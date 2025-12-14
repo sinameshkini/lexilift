@@ -62,3 +62,12 @@ func MakeReview(review entities.Review) Review {
 		Words:           review.Words,
 	}
 }
+
+type ChallengeRequest struct {
+	Word  string `json:"word"`
+	Input string `json:"input"`
+}
+
+type ChallengeResponse struct {
+	Result any `json:"result"`
+}

@@ -44,6 +44,9 @@ func Init(conf *config.Config, c *core.Core) (err error) {
 	api.Get("/reviews/:id", h.getReview)
 	api.Post("/reviews/:id/next", h.nextWord)
 
+	// Challenges
+	api.Post("/challenges/writing", h.writingChallenge)
+
 	return app.Listen(conf.ListenAddress)
 }
 
